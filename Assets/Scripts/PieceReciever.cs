@@ -5,15 +5,42 @@ using UnityEngine;
 public class PieceReciever : MonoBehaviour{
 
     void Start(){
-        Application.targetFrameRate = 20;
+        Application.targetFrameRate = 30;
+        startPos = transform.position;
     }
+    public void reset() {
+        transform.position = startPos;
+        transform.rotation = Quaternion.identity;
+
+    }
+    
     float counter = 90;
     bool isRotating = false;
+    float transparency = 1.0f;
+    Vector3 startPos;
+    public void changeTransparency(float trans) {
+        
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            Material mat = transform.GetChild(i).gameObject.GetComponent<Renderer>().material;
+            Color customColor = new Color(mat.color.r, mat.color.g, mat.color.b, trans);
+            mat.SetColor("_Color", customColor);
+            for (int j = 0; j < transform.GetChild(i).transform.childCount; j++) {
+                mat = transform.GetChild(i).transform.GetChild(j).gameObject.GetComponent<Renderer>().material;
+                mat.SetColor("_Color", customColor);
+            }
+                
+            
+        }
+    }
+    public void setSpeed(bool fast) {
+        speed = fast ? 10000 : 720;
+    }
     float speed = 720;
     Vector3 rotateAround = Vector3.zero;
     public Camera cam;
     void FixedUpdate() {
-        if (isRotating) { 
+        if (isRotating) {
             float rotateAmount = speed * Time.deltaTime;
             if (counter < rotateAmount)
             {
@@ -27,12 +54,14 @@ public class PieceReciever : MonoBehaviour{
                 counter = 90;
                 isRotating = false;
                 rotateAround = Vector3.zero;
-                cam.GetComponent<PieceControl>().reset();
-            }else{
+                cam.GetComponent<PieceControl>().resetMove();
+            }
+            else{
                 transform.RotateAround(rotateAround, rotateAround, rotateAmount);
                 counter -= rotateAmount;
             }
         }
+        
     }
     public void rotate(Vector3 r) {
         isRotating = true;
